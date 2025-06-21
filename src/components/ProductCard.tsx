@@ -86,21 +86,38 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
           <img 
             src={product.image || '/placeholder.svg'} 
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCardClick();
+            }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
             }}
           />
           
+          {/* Badges - Positioned over the image */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+            {product.isFeatured && (
+              <Badge className="bg-emerald-600 text-white shadow-lg text-xs font-semibold">Featured</Badge>
+            )}
+            {hasDiscount && (
+              <Badge className="bg-red-500 text-white shadow-lg text-xs font-semibold">-{discountPercentage}%</Badge>
+            )}
+            {!isInStock && (
+              <Badge className="bg-red-100 text-red-800 shadow-lg text-xs font-semibold">Out of Stock</Badge>
+            )}
+          </div>
+          
           {showActions && (
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center z-10">
               <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={handleQuickView}
-                  className="bg-white/80 text-gray-800 hover:bg-gray-100 shadow"
+                  className="bg-white/90 text-gray-800 hover:bg-gray-100 shadow-lg"
                 >
                   <Eye size={16} />
                 </Button>
@@ -109,7 +126,7 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
                   variant="secondary"
                   onClick={handleWishlistToggle}
                   disabled={wishlistLoading}
-                  className={`bg-white/80 text-gray-800 hover:bg-gray-100 shadow ${
+                  className={`bg-white/90 text-gray-800 hover:bg-gray-100 shadow-lg ${
                     isWishlisted ? 'text-red-500 hover:text-red-600' : ''
                   }`}
                 >
@@ -121,28 +138,15 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
               </div>
             </div>
           )}
-          
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-            {product.isFeatured && (
-              <Badge className="bg-emerald-600 text-white shadow text-xs">Featured</Badge>
-            )}
-            {hasDiscount && (
-              <Badge className="bg-red-500 text-white shadow text-xs">-{discountPercentage}%</Badge>
-            )}
-            {!isInStock && (
-              <Badge className="bg-red-100 text-red-800 shadow text-xs">Out of Stock</Badge>
-            )}
-          </div>
         </div>
       </CardHeader>
       
       <CardContent className="p-3 sm:p-4 pt-0">
         <div className="space-y-2">
-          <h3 className="font-semibold text-gray-800 group-hover:text-emerald-700 transition-colors text-sm sm:text-base line-clamp-2">
+          <h3 className="font-semibold text-gray-800 group-hover:text-emerald-700 transition-colors text-sm sm:text-base product-name">
             {product.name}
           </h3>
-          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+          <p className="text-xs sm:text-sm text-gray-600 product-description">
             {product.shortDescription}
           </p>
           

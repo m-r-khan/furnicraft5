@@ -196,6 +196,8 @@ const Admin = () => {
       weightValue: ''
     },
     image: '',
+    images: [] as string[],
+    newImageUrl: '',
   });
 
   // Modals
@@ -455,6 +457,7 @@ const Admin = () => {
         isFeatured: formData.isFeatured,
         specifications: formData.specifications,
         image: formData.image,
+        images: formData.images || [],
         slug: formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         // Analytics tracking fields
         viewCount: editingProduct ? (editingProduct.viewCount || 0) : 0,
@@ -513,8 +516,21 @@ const Admin = () => {
         weightValue: product.specifications?.weightValue || ''
       },
       image: product.image || '',
+      images: product.images || [product.image || ''].filter(Boolean),
+      newImageUrl: '',
     });
     setShowProductForm(true);
+    
+    // Auto-scroll to the form after a short delay
+    setTimeout(() => {
+      const formElement = document.querySelector('[data-product-form]');
+      if (formElement) {
+        formElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   const handleProductDelete = async (productId: string) => {
@@ -579,6 +595,8 @@ const Admin = () => {
         weightValue: ''
       },
       image: '',
+      images: [],
+      newImageUrl: '',
     });
   };
 
@@ -1168,6 +1186,152 @@ const Admin = () => {
           )
         };
 
+      case 'taxCollected':
+        return {
+          title: 'Tax Collected Details',
+          content: (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-semibold text-blue-800">Tax Collected</h4>
+                  <p className="text-2xl font-bold text-blue-600">₹{revenueAnalytics.taxCollected?.toLocaleString() || '0'}</p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold text-green-800">Tax Rate</h4>
+                  <p className="text-2xl font-bold text-green-600">10% GST</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold">Tax Calculation</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Sales:</span>
+                    <span className="font-medium">₹{revenueAnalytics.totalRevenue?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax Rate:</span>
+                    <span className="font-medium">10%</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-semibold">Tax Collected:</span>
+                    <span className="font-bold text-blue-600">₹{revenueAnalytics.taxCollected?.toLocaleString() || '0'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        };
+
+      case 'inventoryCost':
+        return {
+          title: 'Inventory Cost Details',
+          content: (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-red-50 rounded-lg">
+                  <h4 className="font-semibold text-red-800">Inventory Cost</h4>
+                  <p className="text-2xl font-bold text-red-600">₹{revenueAnalytics.inventoryCost?.toLocaleString() || '0'}</p>
+                </div>
+                <div className="p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-semibold text-orange-800">Cost of Goods Sold</h4>
+                  <p className="text-2xl font-bold text-orange-600">₹{revenueAnalytics.inventoryCost?.toLocaleString() || '0'}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold">Cost Breakdown</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Purchase Cost:</span>
+                    <span className="font-medium">₹{revenueAnalytics.inventoryCost?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Products Sold:</span>
+                    <span className="font-medium">{revenueAnalytics.totalOrders || '0'} orders</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-semibold">Average Cost per Order:</span>
+                    <span className="font-bold text-red-600">₹{revenueAnalytics.totalOrders > 0 ? (revenueAnalytics.inventoryCost / revenueAnalytics.totalOrders).toFixed(2) : '0'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        };
+
+      case 'returnRate':
+        return {
+          title: 'Return Rate Details',
+          content: (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-semibold text-orange-800">Return Rate</h4>
+                  <p className="text-2xl font-bold text-orange-600">{revenueAnalytics.returnRate?.toFixed(1) || '0'}%</p>
+                </div>
+                <div className="p-4 bg-red-50 rounded-lg">
+                  <h4 className="font-semibold text-red-800">Returned Orders</h4>
+                  <p className="text-2xl font-bold text-red-600">{revenueAnalytics.returnedOrders || '0'}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold">Return Statistics</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Orders:</span>
+                    <span className="font-medium">{revenueAnalytics.totalOrders || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Returned Orders:</span>
+                    <span className="font-medium">{revenueAnalytics.returnedOrders || '0'}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-semibold">Return Rate:</span>
+                    <span className="font-bold text-orange-600">{revenueAnalytics.returnRate?.toFixed(1) || '0'}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        };
+
+      case 'refundAmount':
+        return {
+          title: 'Refund Amount Details',
+          content: (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-red-50 rounded-lg">
+                  <h4 className="font-semibold text-red-800">Total Refunds</h4>
+                  <p className="text-2xl font-bold text-red-600">₹{revenueAnalytics.refundAmount?.toLocaleString() || '0'}</p>
+                </div>
+                <div className="p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-semibold text-orange-800">Refund Rate</h4>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {revenueAnalytics.totalRevenue > 0 ? ((revenueAnalytics.refundAmount / revenueAnalytics.totalRevenue) * 100).toFixed(1) : '0'}%
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold">Refund Analysis</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Revenue:</span>
+                    <span className="font-medium">₹{revenueAnalytics.totalRevenue?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Refunds:</span>
+                    <span className="font-medium">₹{revenueAnalytics.refundAmount?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-semibold">Net Revenue:</span>
+                    <span className="font-bold text-green-600">₹{(revenueAnalytics.totalRevenue - revenueAnalytics.refundAmount)?.toLocaleString() || '0'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        };
+
       default:
         return {
           title: 'Dashboard Details',
@@ -1263,10 +1427,10 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-stone-50 overflow-x-hidden">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 overflow-x-hidden">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
           <div className="flex items-center space-x-4">
@@ -1278,117 +1442,136 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="returns">Returns</TabsTrigger>
-            <TabsTrigger value="promocodes">Promo Codes</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="debug">Debug</TabsTrigger>
+          {/* Admin Dashboard Navigation Tabs */}
+          <div className="overflow-x-auto overflow-y-hidden">
+            <TabsList className="admin-tabs-list">
+              <TabsTrigger value="dashboard" className="admin-tabs-trigger">
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="products" className="admin-tabs-trigger">
+                Products
+              </TabsTrigger>
+              <TabsTrigger value="orders" className="admin-tabs-trigger">
+                Orders
+              </TabsTrigger>
+              <TabsTrigger value="users" className="admin-tabs-trigger">
+                Users
+              </TabsTrigger>
+              <TabsTrigger value="returns" className="admin-tabs-trigger">
+                Returns
+              </TabsTrigger>
+              <TabsTrigger value="promocodes" className="admin-tabs-trigger">
+                Promo Codes
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="admin-tabs-trigger">
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="debug" className="admin-tabs-trigger">
+                Debug
+              </TabsTrigger>
           </TabsList>
+          </div>
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* Main Dashboard Tiles */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 admin-dashboard-grid">
               {/* Total Revenue */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('totalRevenue')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Total Revenue</h3>
-                    <DollarSign className="h-5 w-5 text-green-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Total Revenue</h3>
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                   </div>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">
                     ₹{revenueAnalytics.totalRevenue?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">Gross revenue</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Gross revenue</p>
                 </CardContent>
               </Card>
 
               {/* Gross Profit */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('grossProfit')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Gross Profit</h3>
-                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Gross Profit</h3>
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
         </div>
-                  <p className="text-2xl font-bold text-emerald-600">
+                  <p className="text-lg sm:text-2xl font-bold text-emerald-600">
                     ₹{revenueAnalytics.grossProfit?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">{revenueAnalytics.profitMargin?.toFixed(1) || '0'}% margin</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">{revenueAnalytics.profitMargin?.toFixed(1) || '0'}% margin</p>
                 </CardContent>
               </Card>
 
               {/* Tax Collected */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('taxCollected')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Tax Collected</h3>
-                    <CreditCard className="h-5 w-5 text-blue-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Tax Collected</h3>
+                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                     </div>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">
                     ₹{revenueAnalytics.taxCollected?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">10% GST collected</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">10% GST collected</p>
                 </CardContent>
               </Card>
 
               {/* Inventory Cost */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('inventoryCost')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Inventory Cost</h3>
-                    <Package className="h-5 w-5 text-red-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Inventory Cost</h3>
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                   </div>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-lg sm:text-2xl font-bold text-red-600">
                     ₹{revenueAnalytics.inventoryCost?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">Cost of goods sold</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Cost of goods sold</p>
                 </CardContent>
               </Card>
 
               {/* Current Inventory Value */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('currentInventoryValue')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Current Inventory</h3>
-                    <Warehouse className="h-5 w-5 text-purple-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Current Inventory</h3>
+                    <Warehouse className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
                   </div>
-                  <p className="text-2xl font-bold text-purple-600">
+                  <p className="text-lg sm:text-2xl font-bold text-purple-600">
                     ₹{revenueAnalytics.currentInventoryValue?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">Current stock value</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">Current stock value</p>
                 </CardContent>
               </Card>
 
               {/* Return Rate */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-3 sm:p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('returnRate')}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Return Rate</h3>
-                    <RotateCcw className="h-5 w-5 text-orange-600" />
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-800">Return Rate</h3>
+                    <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
                   </div>
-                  <p className="text-2xl font-bold text-orange-600">
+                  <p className="text-lg sm:text-2xl font-bold text-orange-600">
                     {revenueAnalytics.returnRate?.toFixed(1) || '0'}%
                   </p>
                   <p className="text-sm text-gray-500 mt-1">Of total orders</p>
@@ -1397,7 +1580,7 @@ const Admin = () => {
 
               {/* Recent Sales (30 days) */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('recentSales')}
               >
                 <CardContent className="p-4">
@@ -1414,7 +1597,7 @@ const Admin = () => {
 
               {/* Total Orders */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('totalOrders')}
               >
                 <CardContent className="p-4">
@@ -1431,7 +1614,7 @@ const Admin = () => {
 
               {/* Refund Amount */}
               <Card 
-                className="card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300"
+                className="admin-dashboard-tile card-elevated glass p-4 shadow-xl border border-gray-100 cursor-pointer hover:shadow-2xl transition-all duration-300 bg-white"
                 onClick={() => handleDashboardTileClick('refundAmount')}
               >
                 <CardContent className="p-4">
@@ -1709,40 +1892,65 @@ const Admin = () => {
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Product Management</h2>
-              <Button onClick={() => setShowProductForm(true)}>
-                <Plus size={16} className="mr-2" />
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Product Management</h2>
+                <p className="text-sm sm:text-base text-gray-500 mt-1">Manage your product inventory and catalog</p>
+              </div>
+              <Button 
+                onClick={() => setShowProductForm(true)}
+                className="w-full sm:w-auto"
+                size="lg"
+              >
+                <Plus size={18} className="mr-2" />
                 Add Product
               </Button>
             </div>
 
             {/* Product Form */}
             {showProductForm && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</CardTitle>
+              <Card className="shadow-lg border-0 bg-white" data-product-form>
+                <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-gray-100">
+                  <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    {editingProduct ? (
+                      <>
+                        <Edit size={20} className="text-emerald-600" />
+                        Edit Product
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={20} className="text-emerald-600" />
+                        Add New Product
+                      </>
+                    )}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleProductSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Product Name *</Label>
+                <CardContent className="p-6">
+                  <form onSubmit={handleProductSubmit} className="space-y-6">
+                    {/* Basic Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">Basic Information</h3>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name" className="text-sm font-medium text-gray-700">Product Name *</Label>
                         <Input
                           id="name"
                           value={formData.name}
                           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                           required
+                            className="h-11"
+                            placeholder="Enter product name"
                         />
                       </div>
                       
-                      <div>
-                        <Label htmlFor="categoryId">Category *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="categoryId" className="text-sm font-medium text-gray-700">Category *</Label>
                         <Select
                           value={formData.categoryId}
                           onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
                         >
-                          <SelectTrigger>
+                            <SelectTrigger className="h-11">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1755,8 +1963,8 @@ const Admin = () => {
                         </Select>
                       </div>
                       
-                      <div>
-                        <Label htmlFor="price">Price (₹) *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="price" className="text-sm font-medium text-gray-700">Price (₹) *</Label>
                         <Input
                           id="price"
                           type="number"
@@ -1765,11 +1973,13 @@ const Admin = () => {
                           required
                           min="0"
                           step="0.01"
+                            className="h-11"
+                            placeholder="0.00"
                         />
                       </div>
                       
-                      <div>
-                        <Label htmlFor="originalPrice">Original Price (₹)</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="originalPrice" className="text-sm font-medium text-gray-700">Original Price (₹)</Label>
                         <Input
                           id="originalPrice"
                           type="number"
@@ -1777,11 +1987,13 @@ const Admin = () => {
                           onChange={(e) => setFormData(prev => ({ ...prev, originalPrice: e.target.value }))}
                           min="0"
                           step="0.01"
+                            className="h-11"
+                            placeholder="0.00"
                         />
                       </div>
                       
-                      <div>
-                        <Label htmlFor="purchaseCost">Purchase Cost (₹)</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="purchaseCost" className="text-sm font-medium text-gray-700">Purchase Cost (₹)</Label>
                         <Input
                           id="purchaseCost"
                           type="number"
@@ -1789,11 +2001,13 @@ const Admin = () => {
                           onChange={(e) => setFormData(prev => ({ ...prev, purchaseCost: e.target.value }))}
                           min="0"
                           step="0.01"
+                            className="h-11"
+                            placeholder="0.00"
                         />
                       </div>
                       
-                      <div>
-                        <Label htmlFor="stockQuantity">Stock Quantity *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="stockQuantity" className="text-sm font-medium text-gray-700">Stock Quantity *</Label>
                         <Input
                           id="stockQuantity"
                           type="number"
@@ -1801,105 +2015,237 @@ const Admin = () => {
                           onChange={(e) => setFormData(prev => ({ ...prev, stockQuantity: e.target.value }))}
                           required
                           min="0"
+                            className="h-11"
+                            placeholder="0"
                         />
+                        </div>
                       </div>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="shortDescription">Short Description</Label>
+                    {/* Description Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">Description</h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="shortDescription" className="text-sm font-medium text-gray-700">Short Description</Label>
                       <Input
                         id="shortDescription"
                         value={formData.shortDescription}
                         onChange={(e) => setFormData(prev => ({ ...prev, shortDescription: e.target.value }))}
+                            className="h-11"
+                            placeholder="Brief product description"
                       />
                     </div>
                     
-                    <div>
-                      <Label htmlFor="description">Description *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="description" className="text-sm font-medium text-gray-700">Full Description *</Label>
                       <Textarea
                         id="description"
                         value={formData.description}
                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                         required
-                        rows={3}
+                            rows={4}
+                            className="resize-none"
+                            placeholder="Detailed product description..."
                       />
-                    </div>
-                    
-                    {/* Image Upload Section */}
-                    <div>
-                      <Label htmlFor="image">Product Image</Label>
-                      <div className="space-y-2">
-                        <Input
-                          id="image"
-                          type="url"
-                          value={formData.image}
-                          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                          placeholder="https://example.com/image.jpg"
-                        />
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">OR</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  setFormData(prev => ({ 
-                                    ...prev, 
-                                    image: event.target?.result as string 
-                                  }));
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="text-sm"
-                          />
                         </div>
                       </div>
-                      {formData.image && (
-                        <div className="mt-2">
-                          <Label>Image Preview:</Label>
-                          <div className="mt-2 w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                            <img 
-                              src={formData.image} 
-                              alt="Product preview"
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.nextElementSibling?.classList.remove('hidden');
+                    </div>
+                    
+                    {/* Image Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">Product Images</h3>
+                      <div className="space-y-4">
+                        {/* Main Image */}
+                        <div className="space-y-2">
+                          <Label htmlFor="image" className="text-sm font-medium text-gray-700">Main Image URL</Label>
+                          <Input
+                            id="image"
+                            type="url"
+                            value={formData.image}
+                            onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                            className="h-11"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+                        
+                        {/* Upload Main Image */}
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <Label className="text-sm font-medium text-gray-700">Upload Main Image</Label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    setFormData(prev => ({ 
+                                      ...prev, 
+                                      image: event.target?.result as string 
+                                    }));
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
                               }}
+                              className="mt-2 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
                             />
-                            <div className="hidden text-gray-400 text-center p-4">
-                              <div className="text-2xl mb-2">🪑</div>
-                              <div className="text-xs">Invalid Image</div>
+                          </div>
+                        </div>
+                        
+                        {/* Multiple Images */}
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Additional Images</Label>
+                          <div className="space-y-2">
+                            {/* Add Image URL */}
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Add image URL"
+                                value={formData.newImageUrl || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, newImageUrl: e.target.value }))}
+                                className="flex-1"
+                              />
+                              <Button
+                                type="button"
+                                onClick={() => {
+                                  if (formData.newImageUrl?.trim()) {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      images: [...(prev.images || []), prev.newImageUrl!.trim()],
+                                      newImageUrl: ''
+                                    }));
+                                  }
+                                }}
+                                className="px-4"
+                              >
+                                Add URL
+                              </Button>
+                            </div>
+                            
+                            {/* Upload Multiple Images */}
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  files.forEach(file => {
+                                    const reader = new FileReader();
+                                    reader.onload = (event) => {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        images: [...(prev.images || []), event.target?.result as string]
+                                      }));
+                                    };
+                                    reader.readAsDataURL(file);
+                                  });
+                                }}
+                                className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                              />
                             </div>
                           </div>
                         </div>
-                      )}
+                        
+                        {/* Image Previews */}
+                        {(formData.image || (formData.images && formData.images.length > 0)) && (
+                          <div className="space-y-4">
+                            <Label className="text-sm font-medium text-gray-700">Image Previews</Label>
+                            
+                            {/* Main Image Preview */}
+                            {formData.image && (
+                              <div className="space-y-2">
+                                <Label className="text-xs font-medium text-gray-600">Main Image</Label>
+                                <div className="relative w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border-2 border-emerald-200">
+                                  <img 
+                                    src={formData.image} 
+                                    alt="Main product preview"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      target.nextElementSibling?.classList.remove('hidden');
+                                    }}
+                                  />
+                                  <div className="hidden text-gray-400 text-center p-4">
+                                    <div className="text-2xl mb-2">🪑</div>
+                                    <div className="text-xs">Invalid Image</div>
+                                  </div>
+                                  <Badge className="absolute top-1 right-1 bg-emerald-600 text-white text-xs">Main</Badge>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Additional Images */}
+                            {formData.images && formData.images.length > 0 && (
+                              <div className="space-y-2">
+                                <Label className="text-xs font-medium text-gray-600">Additional Images ({formData.images.length})</Label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                  {formData.images.map((image, index) => (
+                                    <div key={index} className="relative w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border-2 border-gray-200">
+                                      <img 
+                                        src={image} 
+                                        alt={`Product image ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                          target.nextElementSibling?.classList.remove('hidden');
+                                        }}
+                                      />
+                                      <div className="hidden text-gray-400 text-center p-2">
+                                        <div className="text-lg mb-1">🪑</div>
+                                        <div className="text-xs">Invalid</div>
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => {
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            images: prev.images?.filter((_, i) => i !== index) || []
+                                          }));
+                                        }}
+                                        className="absolute top-1 right-1 w-6 h-6 p-0 text-xs bg-red-500 hover:bg-red-600"
+                                      >
+                                        ×
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    {/* Settings Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">Settings</h3>
+                      <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                       <input
                         type="checkbox"
                         id="isFeatured"
                         checked={formData.isFeatured}
                         onChange={(e) => setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))}
-                        className="rounded"
+                          className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
                       />
-                      <Label htmlFor="isFeatured">Featured Product</Label>
+                        <Label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">Featured Product</Label>
+                      </div>
                     </div>
                     
                     {/* Specifications Section */}
-                    <div>
-                      <Label className="text-sm font-medium">Specifications</Label>
-                      <div className="space-y-2 mt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <div>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 border-b border-gray-200 pb-2">Specifications</h3>
+                      <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Material</Label>
                             <Input
-                              placeholder="Specification name (e.g., Material)"
+                              placeholder="e.g., Wood, Metal, Plastic"
                               value={formData.specifications.name}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1908,11 +2254,13 @@ const Admin = () => {
                                   name: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Material Value</Label>
                             <Input
-                              placeholder="Value (e.g., Wood)"
+                              placeholder="e.g., Solid Oak, Stainless Steel"
                               value={formData.specifications.value}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1921,13 +2269,15 @@ const Admin = () => {
                                   value: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Dimensions</Label>
                             <Input
-                              placeholder="Specification name (e.g., Dimensions)"
+                              placeholder="e.g., Length x Width x Height"
                               value={formData.specifications.dimensions}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1936,11 +2286,13 @@ const Admin = () => {
                                   dimensions: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Dimensions Value</Label>
                             <Input
-                              placeholder="Value (e.g., 120x60x75 cm)"
+                              placeholder="e.g., 120 x 60 x 75 cm"
                               value={formData.specifications.dimensionsValue}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1949,13 +2301,15 @@ const Admin = () => {
                                   dimensionsValue: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Weight</Label>
                             <Input
-                              placeholder="Specification name (e.g., Weight)"
+                              placeholder="e.g., Product Weight"
                               value={formData.specifications.weight}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1964,11 +2318,13 @@ const Admin = () => {
                                   weight: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Weight Value</Label>
                             <Input
-                              placeholder="Value (e.g., 15 kg)"
+                              placeholder="e.g., 15 kg"
                               value={formData.specifications.weightValue}
                               onChange={(e) => setFormData(prev => ({
                                 ...prev,
@@ -1977,14 +2333,20 @@ const Admin = () => {
                                   weightValue: e.target.value
                                 }
                               }))}
+                              className="h-10"
                             />
                           </div>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex space-x-4">
-                      <Button type="submit">
+                    {/* Form Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                      <Button 
+                        type="submit"
+                        className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700"
+                        size="lg"
+                      >
                         {editingProduct ? 'Update Product' : 'Create Product'}
                       </Button>
                       <Button 
@@ -1995,6 +2357,8 @@ const Admin = () => {
                           setEditingProduct(null);
                           resetForm();
                         }}
+                        className="w-full sm:w-auto"
+                        size="lg"
                       >
                         Cancel
                       </Button>
@@ -2005,16 +2369,33 @@ const Admin = () => {
             )}
 
             {/* Products List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>All Products</CardTitle>
+            <Card className="shadow-lg border-0 bg-white">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <Package size={20} className="text-blue-600" />
+                      All Products ({products.length})
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-1">Manage your product catalog</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {products.filter(p => p.isFeatured).length} Featured
+                    </Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      {products.filter(p => p.stockQuantity > 0).length} In Stock
+                    </Badge>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100">
                   {products.map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div key={product.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                           {product.image ? (
                             <img 
                               src={product.image} 
@@ -2022,42 +2403,72 @@ const Admin = () => {
                               className="w-full h-full object-cover rounded-lg"
                             />
                           ) : (
-                            <div className="text-gray-400">🪑</div>
+                              <div className="text-gray-400 text-2xl">🪑</div>
                           )}
                         </div>
-                        <div>
-                          <h3 className="font-medium">{product.name}</h3>
-                          <p className="text-sm text-gray-500">{product.category?.name}</p>
-                          <p className="text-sm text-gray-500">Stock: {product.stockQuantity}</p>
-                          <p className="text-sm text-blue-600">Cost: ₹{product.purchaseCost?.toLocaleString() || '0'}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <p className="font-medium">₹{product.price ? product.price.toLocaleString() : '0'}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-800 text-lg truncate">{product.name}</h3>
+                                <p className="text-sm text-gray-500 mt-1">{product.category?.name}</p>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  <Badge 
+                                    variant={product.stockQuantity > 10 ? "default" : product.stockQuantity > 0 ? "secondary" : "destructive"}
+                                    className="text-xs"
+                                  >
+                                    Stock: {product.stockQuantity}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    Cost: ₹{product.purchaseCost?.toLocaleString() || '0'}
+                                  </Badge>
                         {product.isFeatured && (
-                          <Badge className="bg-emerald-100 text-emerald-800">
+                                    <Badge className="bg-emerald-100 text-emerald-800 text-xs">
                             Featured
                           </Badge>
                         )}
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-xl font-bold text-emerald-600">₹{product.price ? product.price.toLocaleString() : '0'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
                         <Button
-                          variant="ghost"
+                            variant="outline"
                           size="sm"
                           onClick={() => handleProductEdit(product)}
+                            className="h-9 px-3"
                         >
-                          <Edit size={16} />
+                            <Edit size={16} className="mr-1" />
+                            Edit
                         </Button>
                         <Button
-                          variant="ghost"
+                            variant="outline"
                           size="sm"
                           onClick={() => handleProductDelete(product.id)}
-                          className="text-red-600 hover:text-red-700"
+                            className="h-9 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          <Trash2 size={16} />
+                            <Trash2 size={16} className="mr-1" />
+                            Delete
                         </Button>
+                        </div>
                       </div>
                     </div>
                 ))}
           </div>
+                {products.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 text-6xl mb-4">📦</div>
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">No products yet</h3>
+                    <p className="text-gray-500 mb-4">Get started by adding your first product</p>
+                    <Button onClick={() => setShowProductForm(true)}>
+                      <Plus size={16} className="mr-2" />
+                      Add Product
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -3116,13 +3527,13 @@ const Admin = () => {
 
       {/* Orders Modal */}
       <Dialog open={showOrdersModal} onOpenChange={setShowOrdersModal}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <ShoppingBag size={20} />
               All Orders ({orders.length})
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Detailed view of all orders with customer information and order status
             </DialogDescription>
           </DialogHeader>
@@ -3227,13 +3638,13 @@ const Admin = () => {
 
       {/* Products Modal */}
       <Dialog open={showProductsModal} onOpenChange={setShowProductsModal}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <Package size={20} />
               All Products ({products.length})
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Complete inventory with stock levels and product details
             </DialogDescription>
           </DialogHeader>
@@ -3296,13 +3707,13 @@ const Admin = () => {
 
       {/* Users Modal */}
       <Dialog open={showUsersModal} onOpenChange={setShowUsersModal}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <Users size={20} />
               All Users ({users.length})
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               User management with detailed customer information and order history
             </DialogDescription>
           </DialogHeader>
@@ -3359,13 +3770,13 @@ const Admin = () => {
 
       {/* Revenue Modal */}
       <Dialog open={showRevenueModal} onOpenChange={setShowRevenueModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <DollarSign size={20} />
               Revenue Analytics
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Detailed revenue breakdown and financial insights
             </DialogDescription>
           </DialogHeader>
@@ -3455,30 +3866,30 @@ const Admin = () => {
 
       {/* Order Detail Modal */}
       <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto sm:max-w-2xl lg:max-w-4xl">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2 text-lg sm:text-xl">
               <ShoppingBag className="h-5 w-5" />
               Order #{selectedOrder?.orderNumber}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Order placed on {selectedOrder ? formatDate(selectedOrder.createdAt) : ''}
             </DialogDescription>
           </DialogHeader>
           
           {selectedOrder && (
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto">
               {(() => {
                 try {
                   return (
                     <>
                       {/* Order Status */}
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg gap-4">
                         <div>
-                          <h3 className="font-semibold">Current Status</h3>
+                          <h3 className="font-semibold text-sm sm:text-base">Current Status</h3>
                           <Badge className={`
                             ${getStatusColor(selectedOrder.status)}
-                            flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium
+                            flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm font-medium
                           `}>
                       {getStatusIcon(selectedOrder.status)}
                             {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
@@ -3488,7 +3899,7 @@ const Admin = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => openOrderStatusModal(selectedOrder)}
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 w-full sm:w-auto"
                         >
                           <Edit className="h-4 w-4" />
                           Update Status
@@ -3497,22 +3908,22 @@ const Admin = () => {
 
                       {/* Order Items */}
                     <div>
-                        <h3 className="font-semibold mb-3">Order Items</h3>
+                        <h3 className="font-semibold mb-3 text-sm sm:text-base">Order Items</h3>
                         <div className="space-y-3">
                           {selectedOrder.items?.map((item: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-3">
                               <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                  <Package className="h-6 w-6 text-gray-500" />
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                  <Package className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
                     </div>
                     <div>
-                                  <p className="font-medium">{item.name}</p>
-                                  <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                  <p className="font-medium text-sm sm:text-base">{item.name}</p>
+                                  <p className="text-xs sm:text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                   </div>
                               <div className="text-right">
-                                <p className="font-bold">₹{item.price?.toLocaleString() || '0'}</p>
-                                <p className="text-sm text-gray-500">Total: ₹{((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
+                                <p className="font-bold text-sm sm:text-base">₹{item.price?.toLocaleString() || '0'}</p>
+                                <p className="text-xs sm:text-sm text-gray-500">Total: ₹{((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
                               </div>
                             </div>
                           ))}
@@ -3521,21 +3932,21 @@ const Admin = () => {
 
                       {/* Order Summary */}
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-semibold mb-3">Order Summary</h3>
+                        <h3 className="font-semibold mb-3 text-sm sm:text-base">Order Summary</h3>
                         <div className="space-y-2">
-                          <div className="flex justify-between">
+                          <div className="flex justify-between text-sm sm:text-base">
                             <span>Subtotal:</span>
                             <span>₹{selectedOrder.subtotal?.toLocaleString() || '0'}</span>
                           </div>
-                          <div className="flex justify-between">
+                          <div className="flex justify-between text-sm sm:text-base">
                             <span>Tax:</span>
                             <span>₹{selectedOrder.tax?.toLocaleString() || '0'}</span>
                           </div>
-                          <div className="flex justify-between">
+                          <div className="flex justify-between text-sm sm:text-base">
                             <span>Shipping:</span>
                             <span>₹{selectedOrder.shippingCost?.toLocaleString() || '0'}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-lg border-t pt-2">
+                          <div className="flex justify-between font-bold text-base sm:text-lg border-t pt-2">
                             <span>Total:</span>
                             <span>₹{selectedOrder.total?.toLocaleString() || '0'}</span>
                           </div>
@@ -3544,32 +3955,32 @@ const Admin = () => {
 
               {/* Customer Information */}
                       <div>
-                        <h3 className="font-semibold mb-3">Customer Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <h3 className="font-semibold mb-3 text-sm sm:text-base">Customer Information</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                            <h4 className="font-medium text-gray-700">Shipping Address</h4>
-                            <p className="text-sm">{selectedOrder.shippingAddress?.street || 'N/A'}</p>
-                            <p className="text-sm">{selectedOrder.shippingAddress?.city || 'N/A'}, {selectedOrder.shippingAddress?.state || 'N/A'} {selectedOrder.shippingAddress?.postalCode || selectedOrder.shippingAddress?.pincode || 'N/A'}</p>
+                            <h4 className="font-medium text-gray-700 text-sm sm:text-base">Shipping Address</h4>
+                            <p className="text-xs sm:text-sm">{selectedOrder.shippingAddress?.street || 'N/A'}</p>
+                            <p className="text-xs sm:text-sm">{selectedOrder.shippingAddress?.city || 'N/A'}, {selectedOrder.shippingAddress?.state || 'N/A'} {selectedOrder.shippingAddress?.postalCode || selectedOrder.shippingAddress?.pincode || 'N/A'}</p>
                     </div>
                     <div>
-                            <h4 className="font-medium text-gray-700">Contact</h4>
-                            <p className="text-sm">{selectedOrder.customer?.email || 'N/A'}</p>
-                            <p className="text-sm">{selectedOrder.customer?.phone || 'N/A'}</p>
+                            <h4 className="font-medium text-gray-700 text-sm sm:text-base">Contact</h4>
+                            <p className="text-xs sm:text-sm">{selectedOrder.customer?.email || 'N/A'}</p>
+                            <p className="text-xs sm:text-sm">{selectedOrder.customer?.phone || 'N/A'}</p>
                     </div>
                     </div>
                   </div>
 
                       {/* Status History */}
                     <div>
-                        <h3 className="font-semibold mb-3">Status History</h3>
+                        <h3 className="font-semibold mb-3 text-sm sm:text-base">Status History</h3>
                         <div className="space-y-2">
                           {orderStatusHistory?.map((history, index) => (
                             <div key={index} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
                               <div className={`w-2 h-2 rounded-full ${getStatusColor(history.status).split(' ')[0]}`}></div>
                               <div className="flex-1">
-                                <p className="font-medium">{history.status.charAt(0).toUpperCase() + history.status.slice(1)}</p>
-                                <p className="text-sm text-gray-500">{formatDate(history.timestamp)}</p>
-                                {history.notes && <p className="text-sm text-gray-600 mt-1">{history.notes}</p>}
+                                <p className="font-medium text-sm sm:text-base">{history.status.charAt(0).toUpperCase() + history.status.slice(1)}</p>
+                                <p className="text-xs sm:text-sm text-gray-500">{formatDate(history.timestamp)}</p>
+                                {history.notes && <p className="text-xs sm:text-sm text-gray-600 mt-1">{history.notes}</p>}
                     </div>
                   </div>
                           ))}
@@ -3591,7 +4002,7 @@ const Admin = () => {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOrderDetail(false)}>
+            <Button variant="outline" onClick={() => setShowOrderDetail(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>
@@ -3600,17 +4011,17 @@ const Admin = () => {
 
       {/* Order Status Update Modal */}
       <Dialog open={showOrderStatusModal} onOpenChange={setShowOrderStatusModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Order Status</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-md sm:max-w-lg">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg sm:text-xl">Update Order Status</DialogTitle>
+            <DialogDescription className="text-sm">
               Update the status for Order #{selectedOrder?.orderNumber}
             </DialogDescription>
           </DialogHeader>
           
                   <div className="space-y-4">
             <div>
-              <Label htmlFor="status">New Status</Label>
+              <Label htmlFor="status" className="text-sm">New Status</Label>
               <Select value={newOrderStatus} onValueChange={(value: OrderStatus) => setNewOrderStatus(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select new status" />
@@ -3626,21 +4037,22 @@ const Admin = () => {
                           </div>
             
                           <div>
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes" className="text-sm">Notes (Optional)</Label>
               <Textarea
                 id="notes"
                 placeholder="Add any notes about this status change..."
                 value={orderStatusNotes}
                 onChange={(e) => setOrderStatusNotes(e.target.value)}
+                className="text-sm"
               />
                           </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOrderStatusModal(false)}>
+            <Button variant="outline" onClick={() => setShowOrderStatusModal(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={handleUpdateOrderStatus} disabled={!newOrderStatus}>
+            <Button onClick={handleUpdateOrderStatus} disabled={!newOrderStatus} className="w-full sm:w-auto">
               Update Status
             </Button>
           </DialogFooter>
@@ -3649,13 +4061,13 @@ const Admin = () => {
 
       {/* User Detail Modal */}
       <Dialog open={showUserDetail} onOpenChange={setShowUserDetail}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <Users className="h-5 w-5" />
               User Details - {selectedUser?.firstName} {selectedUser?.lastName}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Complete user information and order history
             </DialogDescription>
           </DialogHeader>
@@ -3808,13 +4220,13 @@ const Admin = () => {
 
       {/* User Order Detail Modal (inside User Detail Modal) */}
       <Dialog open={showUserOrderDetail} onOpenChange={setShowUserOrderDetail}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <ShoppingBag className="h-5 w-5" />
               Order Details - #{selectedUserOrder?.orderNumber}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Detailed information and status update for this order
             </DialogDescription>
           </DialogHeader>
@@ -3941,13 +4353,13 @@ const Admin = () => {
 
       {/* Return Detail Modal */}
       <Dialog open={showReturnDetail} onOpenChange={setShowReturnDetail}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <RotateCcw className="h-5 w-5" />
               Return Details - #{selectedReturnRequest?.id.slice(-6)}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Detailed information and actions for this return request
             </DialogDescription>
           </DialogHeader>
@@ -4167,8 +4579,8 @@ const Admin = () => {
       
       {/* Return Action Modal */}
       <Dialog open={showReturnActionModal} onOpenChange={setShowReturnActionModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-md">
+          <DialogHeader className="mb-4">
             <DialogTitle>
               {returnActionType === 'approve' && 'Approve Return Request'}
               {returnActionType === 'reject' && 'Reject Return Request'}
@@ -4177,7 +4589,7 @@ const Admin = () => {
               {returnActionType === 'mark_received' && 'Mark as Received'}
               {returnActionType === 'process_refund' && 'Process Refund'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               {returnActionType === 'approve' && 'Are you sure you want to approve this return request?'}
               {returnActionType === 'reject' && 'Are you sure you want to reject this return request?'}
               {returnActionType === 'schedule_pickup' && 'Schedule pickup for this return'}
@@ -4331,25 +4743,25 @@ const Admin = () => {
       
       {/* Promo Code Detail Modal */}
       <Dialog open={showPromoDetail} onOpenChange={setShowPromoDetail}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Promo Code Details</DialogTitle>
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg sm:text-xl">Promo Code Details</DialogTitle>
           </DialogHeader>
           
           {selectedPromoCode && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Code</Label>
-                  <p className="text-lg font-semibold">{selectedPromoCode.code}</p>
+                  <p className="text-base sm:text-lg font-semibold">{selectedPromoCode.code}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Type</Label>
-                  <p className="text-lg font-semibold capitalize">{selectedPromoCode.type}</p>
+                  <p className="text-base sm:text-lg font-semibold capitalize">{selectedPromoCode.type}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Value</Label>
-                  <p className="text-lg font-semibold">
+                  <p className="text-base sm:text-lg font-semibold">
                     {selectedPromoCode.type === 'percentage' ? `${selectedPromoCode.value}%` : `₹${selectedPromoCode.value}`}
                   </p>
                 </div>
@@ -4361,23 +4773,23 @@ const Admin = () => {
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Usage</Label>
-                  <p className="text-lg font-semibold">{selectedPromoCode.usedCount}/{selectedPromoCode.usageLimit}</p>
+                  <p className="text-base sm:text-lg font-semibold">{selectedPromoCode.usedCount}/{selectedPromoCode.usageLimit}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Min Order Amount</Label>
-                  <p className="text-lg font-semibold">₹{selectedPromoCode.minOrderAmount || '0'}</p>
+                  <p className="text-base sm:text-lg font-semibold">₹{selectedPromoCode.minOrderAmount || '0'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Max Discount</Label>
-                  <p className="text-lg font-semibold">₹{selectedPromoCode.maxDiscount || 'No limit'}</p>
+                  <p className="text-base sm:text-lg font-semibold">₹{selectedPromoCode.maxDiscount || 'No limit'}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Valid From</Label>
-                  <p className="text-lg font-semibold">{formatDate(selectedPromoCode.validFrom)}</p>
+                  <p className="text-base sm:text-lg font-semibold">{formatDate(selectedPromoCode.validFrom)}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Valid Until</Label>
-                  <p className="text-lg font-semibold">{formatDate(selectedPromoCode.validUntil)}</p>
+                  <p className="text-base sm:text-lg font-semibold">{formatDate(selectedPromoCode.validUntil)}</p>
                 </div>
               </div>
 
@@ -4413,14 +4825,15 @@ const Admin = () => {
                 </div>
               )}
 
-              <div className="flex space-x-2">
-                <Button onClick={() => handlePromoCodeEdit(selectedPromoCode)}>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <Button onClick={() => handlePromoCodeEdit(selectedPromoCode)} className="w-full sm:w-auto">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Promo Code
                 </Button>
                 <Button 
                   variant="destructive" 
                   onClick={() => handlePromoCodeDelete(selectedPromoCode.id)}
+                  className="w-full sm:w-auto"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Promo Code
@@ -4430,7 +4843,7 @@ const Admin = () => {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPromoDetail(false)}>
+            <Button variant="outline" onClick={() => setShowPromoDetail(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>
@@ -4439,23 +4852,23 @@ const Admin = () => {
       
       {/* Dashboard Analytics Modal */}
       <Dialog open={showDashboardModal} onOpenChange={setShowDashboardModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="p-6 rounded-xl bg-white shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto sm:max-w-2xl lg:max-w-4xl">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
               {getDashboardModalContent().title}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-500">
               Real-time analytics data from your store
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             {getDashboardModalContent().content}
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDashboardModal(false)}>
+            <Button variant="outline" onClick={() => setShowDashboardModal(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>

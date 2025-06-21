@@ -249,33 +249,33 @@ const Navbar = () => {
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t">
               <div className="flex flex-col space-y-4">
-                <Link to="/" className="text-gray-700 hover:text-emerald-700 transition-colors">
+                <Link to="/" className="text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                   Home
                 </Link>
-                <Link to="/products" className="text-gray-700 hover:text-emerald-700 transition-colors">
+                <Link to="/products" className="text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                   Products
                 </Link>
                 {user && (
-                  <Link to="/orders" className="text-gray-700 hover:text-emerald-700 transition-colors">
+                  <Link to="/orders" className="text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                     My Orders
                   </Link>
                 )}
                 {user?.role === 'admin' && (
-                  <Link to="/admin" className="text-gray-700 hover:text-emerald-700 transition-colors">
+                  <Link to="/admin" className="text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                     Admin
                   </Link>
                 )}
-                <Link to="/wishlist" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors">
+                <Link to="/wishlist" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                   <Heart size={20} />
                   <span>Wishlist ({getWishlistCount()})</span>
                 </Link>
-                <Link to="/cart" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors">
+                <Link to="/cart" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                   <ShoppingCart size={20} />
                   <span>Cart ({cartItemsCount})</span>
                 </Link>
                 {user ? (
                   <div className="flex flex-col space-y-2">
-                    <Link to="/profile" className="flex items-center">
+                    <Link to="/profile" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
                       <Avatar className="w-9 h-9">
                         {profile?.avatar ? (
                           <AvatarImage src={profile.avatar} alt={getDisplayName()} />
@@ -285,14 +285,17 @@ const Navbar = () => {
                       </Avatar>
                     </Link>
                     <button
-                      onClick={logout}
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
                       className="text-left text-gray-700 hover:text-emerald-700 transition-colors"
                     >
                       Logout
                     </button>
                   </div>
                 ) : (
-                  <Link to="/login" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors">
+                  <Link to="/login" className="flex items-center space-x-2 text-gray-700 hover:text-emerald-700 transition-colors" onClick={() => setIsMenuOpen(false)}>
                     <User size={20} />
                     <span>Login</span>
                   </Link>
