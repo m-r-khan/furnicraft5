@@ -348,7 +348,96 @@ const Admin = () => {
           refundedAmount: returnStats.totalRefundAmount
         });
 
-        // Create users from actual orders
+        // Load all users from authentication system (admin, test, and real users)
+        const getAllAuthUsers = () => {
+          // Default admin and test users
+          const defaultUsers = [
+            {
+              id: '1',
+              email: 'admin@furnicraft.com',
+              role: 'admin',
+              isEmailVerified: true,
+              isActive: true,
+              failedLoginAttempts: 0,
+              createdAt: new Date('2024-01-01'),
+              updatedAt: new Date('2024-01-01'),
+            },
+            {
+              id: '2',
+              email: 'user@test.com',
+              role: 'customer',
+              isEmailVerified: true,
+              isActive: true,
+              failedLoginAttempts: 0,
+              createdAt: new Date('2024-01-01'),
+              updatedAt: new Date('2024-01-01'),
+            },
+          ];
+
+          // Default admin and test profiles
+          const defaultProfiles = [
+            {
+              id: '1',
+              userId: '1',
+              firstName: 'Admin',
+              lastName: 'User',
+              preferences: {
+                newsletter: true,
+                marketingEmails: false,
+                notifications: true,
+              },
+              createdAt: new Date('2024-01-01'),
+              updatedAt: new Date('2024-01-01'),
+            },
+            {
+              id: '2',
+              userId: '2',
+              firstName: 'Test',
+              lastName: 'User',
+              preferences: {
+                newsletter: true,
+                marketingEmails: false,
+                notifications: true,
+              },
+              createdAt: new Date('2024-01-01'),
+              updatedAt: new Date('2024-01-01'),
+            },
+          ];
+
+          // Get dynamic users from localStorage
+          const storedDynamicUsers = localStorage.getItem('furnicraft_dynamic_users');
+          const storedDynamicProfiles = localStorage.getItem('furnicraft_dynamic_profiles');
+          
+          let dynamicUsers: any[] = [];
+          let dynamicProfiles: any[] = [];
+          
+          if (storedDynamicUsers) {
+            try {
+              dynamicUsers = JSON.parse(storedDynamicUsers);
+            } catch (error) {
+              console.error('Error parsing dynamic users:', error);
+            }
+          }
+          
+          if (storedDynamicProfiles) {
+            try {
+              dynamicProfiles = JSON.parse(storedDynamicProfiles);
+            } catch (error) {
+              console.error('Error parsing dynamic profiles:', error);
+            }
+          }
+          
+          // Combine default and dynamic users and profiles
+          const allAuthUsers = [...defaultUsers, ...dynamicUsers];
+          const allAuthProfiles = [...defaultProfiles, ...dynamicProfiles];
+          
+          return { allAuthUsers, allAuthProfiles };
+        };
+
+        // Get all registered users
+        const { allAuthUsers, allAuthProfiles } = getAllAuthUsers();
+        
+        // Create users from actual orders (for order statistics)
         const orderUsers = new Map();
         allOrders.forEach(order => {
           if (order.customer && order.customer.email) {
@@ -384,25 +473,42 @@ const Admin = () => {
           }
         });
 
-        // Sample admin user
-        const adminUser = {
-          id: 'admin',
-          firstName: 'Admin',
-          lastName: 'User',
-          email: 'admin@furnicraft.com',
-          role: 'admin',
-          createdAt: '2024-01-01',
-          phone: '+91 98765 43213',
-          totalOrders: 0,
-          totalSpent: 0,
-          lastOrder: null
-        };
-
-        // Combine order users and admin user
-        const allUsers = [adminUser, ...Array.from(orderUsers.values())];
+        // Combine all users: auth users + order users (with order statistics)
+        const allUsersMap = new Map();
         
+        // Add all registered users first
+        allAuthUsers.forEach(authUser => {
+          const profile = allAuthProfiles.find(p => p.userId === authUser.id);
+          const orderUser = orderUsers.get(authUser.email);
+          
+          allUsersMap.set(authUser.email, {
+            id: authUser.id,
+            firstName: profile?.firstName || 'Unknown',
+            lastName: profile?.lastName || 'User',
+            email: authUser.email,
+            role: authUser.role,
+            createdAt: authUser.createdAt,
+            phone: orderUser?.phone || '+91 98765 43210',
+            totalOrders: orderUser?.totalOrders || 0,
+            totalSpent: orderUser?.totalSpent || 0,
+            lastOrder: orderUser?.lastOrder || null,
+            isEmailVerified: authUser.isEmailVerified,
+            isActive: authUser.isActive
+          });
+        });
+        
+        // Add any order users that don't have auth accounts (guest orders)
+        orderUsers.forEach((orderUser, email) => {
+          if (!allUsersMap.has(email)) {
+            allUsersMap.set(email, orderUser);
+          }
+        });
+        
+        const allUsers = Array.from(allUsersMap.values());
+        
+        console.log(`Auth users: ${allAuthUsers.length}`);
         console.log(`Order users: ${orderUsers.size}`);
-        console.log(`Total users: ${allUsers.length}`);
+        console.log(`Total combined users: ${allUsers.length}`);
         
         setUsers(allUsers);
         
