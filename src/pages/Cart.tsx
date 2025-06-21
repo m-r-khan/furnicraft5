@@ -144,29 +144,29 @@ const Cart = () => {
     <div className="min-h-screen bg-stone-50">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex items-center gap-2 mb-6 sm:mb-8">
           <Button variant="ghost" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </Button>
-          <h1 className="text-3xl font-bold text-gray-800">Your Cart</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Your Cart</h1>
           <Badge variant="secondary" className="ml-2">
             {getItemCount()} items
           </Badge>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <span>Shopping Cart</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={handleClearCart}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 w-full sm:w-auto"
                   >
                     Clear Cart
                   </Button>
@@ -174,9 +174,9 @@ const Cart = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {cart.items.map(item => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg">
                     {/* Product Image */}
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       {item.product?.image ? (
                         <img 
                           src={item.product.image} 
@@ -184,24 +184,24 @@ const Cart = () => {
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
-                        <div className="text-gray-400 text-2xl">🪑</div>
+                        <div className="text-gray-400 text-xl sm:text-2xl">🪑</div>
                       )}
                     </div>
                     
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-800 truncate">
+                      <h3 className="font-semibold text-gray-800 truncate text-sm sm:text-base">
                         {item.product?.name || 'Product Name'}
                       </h3>
-                      <p className="text-gray-600 text-sm truncate">
+                      <p className="text-gray-600 text-xs sm:text-sm truncate">
                         {item.product?.shortDescription || 'Product description'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-emerald-700 font-semibold">
+                        <span className="text-emerald-700 font-semibold text-sm sm:text-base">
                           ₹{item.price.toLocaleString()}
                         </span>
                         {item.product?.originalPrice && item.product.originalPrice > item.price && (
-                          <span className="text-gray-500 text-sm line-through">
+                          <span className="text-gray-500 text-xs sm:text-sm line-through">
                             ₹{item.product.originalPrice.toLocaleString()}
                           </span>
                         )}
@@ -209,48 +209,50 @@ const Cart = () => {
                     </div>
                     
                     {/* Quantity Controls */}
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                          disabled={updatingItems.has(item.productId) || item.quantity <= 1}
+                        >
+                          <Minus size={16} />
+                        </Button>
+                        <span className="font-semibold px-3 py-1 bg-gray-100 rounded min-w-[40px] text-center text-sm">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                          disabled={updatingItems.has(item.productId) || (item.product && item.quantity >= item.product.stockQuantity)}
+                        >
+                          <Plus size={16} />
+                        </Button>
+                      </div>
+                      
+                      {/* Remove Button */}
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                        disabled={updatingItems.has(item.productId) || item.quantity <= 1}
+                        onClick={() => handleRemoveItem(item.productId)}
+                        disabled={updatingItems.has(item.productId)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
-                        <Minus size={16} />
-                      </Button>
-                      <span className="font-semibold px-3 py-1 bg-gray-100 rounded min-w-[40px] text-center">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                        disabled={updatingItems.has(item.productId) || (item.product && item.quantity >= item.product.stockQuantity)}
-                      >
-                        <Plus size={16} />
+                        <Trash2 size={16} />
                       </Button>
                     </div>
                     
                     {/* Item Total */}
-                    <div className="text-right min-w-[100px]">
-                      <div className="font-semibold text-gray-800">
+                    <div className="text-right sm:text-left">
+                      <div className="font-semibold text-gray-800 text-sm sm:text-base">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs sm:text-sm text-gray-500">
                         ₹{item.price.toLocaleString()} each
                       </div>
                     </div>
-                    
-                    {/* Remove Button */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveItem(item.productId)}
-                      disabled={updatingItems.has(item.productId)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
                   </div>
                 ))}
               </CardContent>
@@ -261,7 +263,7 @@ const Cart = () => {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Price Breakdown */}
@@ -285,23 +287,23 @@ const Cart = () => {
                 
                 <Separator />
                 
-                <div className="flex justify-between text-lg font-semibold">
+                <div className="flex justify-between text-base sm:text-lg font-semibold">
                   <span>Total</span>
                   <span className="text-emerald-700">₹{total.toLocaleString()}</span>
                 </div>
                 
                 {/* Shipping Info */}
                 <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Truck size={16} className="text-emerald-600" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Truck size={16} className="text-emerald-600 flex-shrink-0" />
                     <span>Free delivery within city limits</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock size={16} className="text-emerald-600" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Clock size={16} className="text-emerald-600 flex-shrink-0" />
                     <span>3-5 business days</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Shield size={16} className="text-emerald-600" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                    <Shield size={16} className="text-emerald-600 flex-shrink-0" />
                     <span>1 year warranty included</span>
                   </div>
                 </div>

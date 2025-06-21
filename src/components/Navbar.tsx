@@ -305,7 +305,7 @@ const Navbar = () => {
 
       {/* Settings Modal */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings size={20} />
@@ -317,29 +317,33 @@ const Navbar = () => {
           </DialogHeader>
           
           <Tabs value={settingsTab} onValueChange={setSettingsTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User size={16} />
-                Profile
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
+              <TabsTrigger value="profile" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <User size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Profile</span>
+                <span className="sm:hidden">Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center gap-2">
-                <Lock size={16} />
-                Security
+              <TabsTrigger value="security" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Lock size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Security</span>
+                <span className="sm:hidden">Security</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell size={16} />
-                Notifications
+              <TabsTrigger value="notifications" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                <Bell size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Notifications</span>
+                <span className="sm:hidden">Notif</span>
               </TabsTrigger>
-              <TabsTrigger value="danger" className="flex items-center gap-2 text-red-600">
-                <Shield size={16} />
-                Danger Zone
+              <TabsTrigger value="danger" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-red-600">
+                <Shield size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Danger Zone</span>
+                <span className="sm:hidden">Danger</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-4">
               <form onSubmit={handleProfileUpdate}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
@@ -356,7 +360,7 @@ const Navbar = () => {
                       onChange={(e) => setSettingsData(prev => ({ ...prev, lastName: e.target.value }))}
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
@@ -365,7 +369,7 @@ const Navbar = () => {
                       className="bg-gray-50"
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
@@ -374,8 +378,8 @@ const Navbar = () => {
                     />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-4">
-                  <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
+                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <Link to="/profile" className="text-sm text-emerald-600 hover:text-emerald-700">
                       View Full Profile →
                     </Link>
@@ -383,7 +387,7 @@ const Navbar = () => {
                       View Order History →
                     </Link>
                   </div>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                     {isLoading ? 'Updating...' : 'Update Profile'}
                   </Button>
                 </div>
@@ -426,7 +430,7 @@ const Navbar = () => {
                   </div>
                 </div>
                 <div className="flex justify-end mt-4">
-                  <Button type="submit" disabled={isUpdatingPassword}>
+                  <Button type="submit" disabled={isUpdatingPassword} className="w-full sm:w-auto">
                     {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                   </Button>
                 </div>
@@ -436,8 +440,8 @@ const Navbar = () => {
             {/* Notifications Tab */}
             <TabsContent value="notifications" className="space-y-4">
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                  <div className="flex-1">
                     <Label className="text-sm font-medium">Email Newsletter</Label>
                     <p className="text-sm text-gray-500">Receive updates about new products and offers</p>
                   </div>
@@ -448,8 +452,8 @@ const Navbar = () => {
                     className="rounded"
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                  <div className="flex-1">
                     <Label className="text-sm font-medium">Marketing Emails</Label>
                     <p className="text-sm text-gray-500">Receive promotional emails and special offers</p>
                   </div>
@@ -460,8 +464,8 @@ const Navbar = () => {
                     className="rounded"
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                  <div className="flex-1">
                     <Label className="text-sm font-medium">Order Notifications</Label>
                     <p className="text-sm text-gray-500">Get notified about order status updates</p>
                   </div>
@@ -474,7 +478,7 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleProfileUpdate} disabled={isLoading}>
+                <Button onClick={handleProfileUpdate} disabled={isLoading} className="w-full sm:w-auto">
                   {isLoading ? 'Saving...' : 'Save Preferences'}
                 </Button>
               </div>
@@ -489,8 +493,8 @@ const Navbar = () => {
                 </p>
                 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-white border border-red-200 rounded-lg">
-                    <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-red-200 rounded-lg gap-4">
+                    <div className="flex-1">
                       <h4 className="font-medium text-red-800">Delete Account</h4>
                       <p className="text-sm text-red-600">
                         Permanently delete your account and all associated data
@@ -500,6 +504,7 @@ const Navbar = () => {
                       variant="destructive"
                       onClick={handleDeleteAccount}
                       disabled={isDeletingAccount}
+                      className="w-full sm:w-auto"
                     >
                       {isDeletingAccount ? 'Deleting...' : 'Delete Account'}
                     </Button>
@@ -510,7 +515,7 @@ const Navbar = () => {
           </Tabs>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSettings(false)}>
+            <Button variant="outline" onClick={() => setShowSettings(false)} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>

@@ -148,13 +148,14 @@ const ProductGrid = ({
       {(showSearch || showFilters) && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <span>Products ({displayProducts.length} found)</span>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+                  className="text-xs sm:text-sm"
                 >
                   <Filter size={16} className="mr-2" />
                   Filters
@@ -182,7 +183,7 @@ const ProductGrid = ({
           <CardContent className="space-y-4">
             {/* Search Bar */}
             {showSearch && (
-              <form onSubmit={handleSearch} className="flex gap-2">
+              <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <Input
@@ -192,13 +193,13 @@ const ProductGrid = ({
                     className="pl-10"
                   />
                 </div>
-                <Button type="submit">Search</Button>
+                <Button type="submit" className="w-full sm:w-auto">Search</Button>
               </form>
             )}
 
             {/* Filters Panel */}
             {showFilters && showFiltersPanel && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
                 {/* Category Filter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Category</label>
@@ -275,7 +276,7 @@ const ProductGrid = ({
                 </div>
 
                 {/* Sort Order */}
-                <div>
+                <div className="sm:col-span-2 lg:col-span-1">
                   <label className="text-sm font-medium mb-2 block">Order</label>
                   <Select
                     value={filters.sortOrder || 'asc'}
@@ -297,31 +298,31 @@ const ProductGrid = ({
             {showFilters && (
               <div className="flex flex-wrap gap-2">
                 {filters.category && (
-                  <Badge variant="secondary" className="cursor-pointer" onClick={() => handleFilterChange('category', undefined)}>
+                  <Badge variant="secondary" className="cursor-pointer text-xs" onClick={() => handleFilterChange('category', undefined)}>
                     Category: {categories.find(c => c.id === filters.category)?.name}
                     <span className="ml-1">×</span>
                   </Badge>
                 )}
                 {filters.priceRange && (filters.priceRange.min > 0 || filters.priceRange.max < 100000) && (
-                  <Badge variant="secondary" className="cursor-pointer" onClick={() => handleFilterChange('priceRange', { min: 0, max: 100000 })}>
+                  <Badge variant="secondary" className="cursor-pointer text-xs" onClick={() => handleFilterChange('priceRange', { min: 0, max: 100000 })}>
                     Price: ₹{filters.priceRange.min.toLocaleString()} - ₹{filters.priceRange.max.toLocaleString()}
                     <span className="ml-1">×</span>
                   </Badge>
                 )}
                 {filters.inStock !== undefined && (
-                  <Badge variant="secondary" className="cursor-pointer" onClick={() => handleFilterChange('inStock', undefined)}>
+                  <Badge variant="secondary" className="cursor-pointer text-xs" onClick={() => handleFilterChange('inStock', undefined)}>
                     Stock: {filters.inStock ? 'In Stock' : 'Out of Stock'}
                     <span className="ml-1">×</span>
                   </Badge>
                 )}
                 {searchQuery && (
-                  <Badge variant="secondary" className="cursor-pointer" onClick={() => setSearchQuery('')}>
+                  <Badge variant="secondary" className="cursor-pointer text-xs" onClick={() => setSearchQuery('')}>
                     Search: "{searchQuery}"
                     <span className="ml-1">×</span>
                   </Badge>
                 )}
                 {(filters.category || (filters.priceRange && (filters.priceRange.min > 0 || filters.priceRange.max < 100000)) || filters.inStock !== undefined || searchQuery) && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs">
                     Clear All
                   </Button>
                 )}
@@ -333,7 +334,7 @@ const ProductGrid = ({
 
       {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(8)].map((_, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
               <div className="bg-gray-300 h-48 rounded-lg mb-4"></div>
@@ -347,9 +348,9 @@ const ProductGrid = ({
       {/* Products Grid */}
       {!isLoading && (
         <>
-          <div className={`grid gap-6 ${
+          <div className={`grid gap-4 sm:gap-6 ${
             viewMode === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'grid-cols-1'
           }`}>
             {paginatedProducts.map(product => (
@@ -370,18 +371,19 @@ const ProductGrid = ({
 
       {/* Pagination */}
       {showPagination && totalPages > 1 && !isLoading && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-8">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
+            className="w-full sm:w-auto"
           >
             <ChevronLeft size={16} />
             Previous
           </Button>
           
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap justify-center">
             {[...Array(totalPages)].map((_, index) => {
               const page = index + 1;
               return (
@@ -390,6 +392,7 @@ const ProductGrid = ({
                   variant={currentPage === page ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setCurrentPage(page)}
+                  className="text-xs sm:text-sm"
                 >
                   {page}
                 </Button>
@@ -402,6 +405,7 @@ const ProductGrid = ({
             size="sm"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
+            className="w-full sm:w-auto"
           >
             Next
             <ChevronRight size={16} />

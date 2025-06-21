@@ -81,8 +81,8 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
       className="group card-elevated glass hover:shadow-xl transition-all duration-300 cursor-pointer bg-white/80 backdrop-blur-sm border border-emerald-100"
       onClick={handleCardClick}
     >
-      <CardHeader className="p-4 relative">
-        <div className="aspect-square bg-white rounded-lg overflow-hidden mb-4 relative">
+      <CardHeader className="p-3 sm:p-4 relative">
+        <div className="aspect-square bg-white rounded-lg overflow-hidden mb-3 sm:mb-4 relative">
           <img 
             src={product.image || '/placeholder.svg'} 
             alt={product.name}
@@ -125,24 +125,24 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
             {product.isFeatured && (
-              <Badge className="bg-emerald-600 text-white shadow">Featured</Badge>
+              <Badge className="bg-emerald-600 text-white shadow text-xs">Featured</Badge>
             )}
             {hasDiscount && (
-              <Badge className="bg-red-500 text-white shadow">-{discountPercentage}%</Badge>
+              <Badge className="bg-red-500 text-white shadow text-xs">-{discountPercentage}%</Badge>
             )}
             {!isInStock && (
-              <Badge className="bg-red-100 text-red-800 shadow">Out of Stock</Badge>
+              <Badge className="bg-red-100 text-red-800 shadow text-xs">Out of Stock</Badge>
             )}
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="p-4 pt-0">
+      <CardContent className="p-3 sm:p-4 pt-0">
         <div className="space-y-2">
-          <h3 className="font-semibold text-gray-800 group-hover:text-emerald-700 transition-colors">
+          <h3 className="font-semibold text-gray-800 group-hover:text-emerald-700 transition-colors text-sm sm:text-base line-clamp-2">
             {product.name}
           </h3>
-          <p className="text-sm text-gray-600 line-clamp-2">
+          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
             {product.shortDescription}
           </p>
           
@@ -151,8 +151,8 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  size={14}
-                  className="fill-yellow-400 text-yellow-400"
+                  size={12}
+                  className="fill-yellow-400 text-yellow-400 sm:w-3.5 sm:h-3.5"
                 />
               ))}
             </div>
@@ -160,11 +160,11 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
           </div>
           
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-emerald-700">
+            <span className="text-base sm:text-lg font-bold text-emerald-700">
               ₹{product.price.toLocaleString()}
             </span>
             {hasDiscount && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-xs sm:text-sm text-gray-500 line-through">
                 ₹{product.originalPrice!.toLocaleString()}
               </span>
             )}
@@ -173,11 +173,11 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
       </CardContent>
       
       {showActions && (
-        <CardFooter className="p-4 pt-0 bg-white/90 border-t border-emerald-50">
+        <CardFooter className="p-3 sm:p-4 pt-0 bg-white/90 border-t border-emerald-50">
           {isInCart ? (
             <Button
               onClick={e => { e.stopPropagation(); navigate('/cart'); }}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg text-sm"
               size="sm"
             >
               Go to Cart
@@ -186,7 +186,7 @@ const ProductCard = ({ product, showActions = true }: ProductCardProps) => {
             <Button
               onClick={handleAddToCart}
               disabled={!isInStock || adding}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-lg text-sm"
               size="sm"
             >
               {adding ? (

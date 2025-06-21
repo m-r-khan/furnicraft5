@@ -51,21 +51,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center py-8 sm:py-12 px-4">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <Link to="/" className="text-3xl font-bold text-emerald-700">
+          <Link to="/" className="text-2xl sm:text-3xl font-bold text-emerald-700">
             FurniCraft
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-bold text-gray-900">
             Welcome back
           </h2>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Sign in to your account
           </p>
         </div>
 
-        <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
+        <form className="mt-6 sm:mt-8 space-y-6 bg-white p-6 sm:p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -78,7 +78,7 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 text-sm sm:text-base"
                 placeholder="Enter your email"
               />
             </div>
@@ -94,7 +94,7 @@ const Login = () => {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 text-sm sm:text-base"
                 placeholder="Enter your password"
               />
             </div>
@@ -117,14 +117,14 @@ const Login = () => {
             </p>
           </div>
 
-          <div className="mt-4 p-4 bg-gray-50 rounded-md">
+          <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600 mb-2">Demo accounts:</p>
             <p className="text-xs text-gray-500">Admin: admin@furnicraft.com / admin123</p>
             <p className="text-xs text-gray-500">User: user@test.com / user123</p>
           </div>
 
           {/* Debug buttons */}
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <button
               type="button"
               onClick={handleDebug}
